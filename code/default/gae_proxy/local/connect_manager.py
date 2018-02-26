@@ -319,7 +319,9 @@ class Https_connection_manager(object):
                     self.new_conn_pool.qsize(only_h1=True) < 1:
 
                 if self.new_conn_pool.qsize() > self.connection_pool_max_num:
-                    break
+                    handshake_time, ssl_sock = self.new_conn_pool.get_slowest()
+                    google_ip.report_connect_closed(ssl_sock.ip, "slowest %d" % ssl_sock.handshake_time)
+                    ssl_sock.close()
 
                 if not connect_control.allow_connect():
                     break
@@ -342,6 +344,7 @@ class Https_connection_manager(object):
                     self.ssl_timeout_cb(ssl_sock)
                 else:
                     self.new_conn_pool.put((ssl_sock.handshake_time, ssl_sock))
+                    xlog.info("create a new conn, current conn num is {}".format(self.new_conn_pool.qsize()))
                 time.sleep(1)
         finally:
             self.thread_num_lock.acquire()
