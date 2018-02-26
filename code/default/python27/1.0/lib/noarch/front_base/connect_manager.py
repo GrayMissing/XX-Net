@@ -181,7 +181,7 @@ class ConnectManager(object):
         # call the callback.
         # This callback will put ssl to worker
         self.ssl_timeout_cb = None
-        
+
         self.new_conn_pool = ConnectPool()
         self.gae_conn_pool = ConnectPool()
         self.host_conn_pool = {}
